@@ -12,7 +12,7 @@ cd Compost
 ```shell
 docker run -it --rm --name PHP-Compost \
 -v "$PWD":/usr/src/myapp \
--w /usr/src/myapp 
+-w /usr/src/myapp \
 php:5.6-cli php index.php
 ```
 
