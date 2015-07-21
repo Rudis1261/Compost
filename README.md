@@ -18,6 +18,7 @@ php:5.6-cli php index.php
 
 Hopefully you have Docker installed already, otherwise this will not work. 
 
+#### Example usage 'index.php'
 ```php
 <?php
 
