@@ -8,24 +8,30 @@
  */
 class Compost
 {
-    public $type        = '';
-    public $files       = array("header" => array(), "footer" => array());
-    public $inputDir    = '';
-    public $outputDir   = '';
-    public $uri         = '';
-    public $output      = '';
-    public $hash        = array("header" => '', "footer" => '');
-    public $heap        = array("header" => '', "footer" => '');
-    public $debug       = false;
-    public $rendered    = array("header" => false, "footer" => false);
+    public $type      = '';
+    public $files     = ["header" => [], "footer" => []];
+    public $inputDir  = '';
+    public $outputDir = '';
+    public $uri       = '';
+    public $output    = '';
+    public $hash      = ["header" => '', "footer" => ''];
+    public $heap      = ["header" => '', "footer" => ''];
+    public $debug     = false;
+    public $rendered  = ["header" => false, "footer" => false];
+
+
+    function __construct() {
+        if ($this->debug) error_reporting(-1);
+        if ($this->debug) ini_set("display_errors", 1);
+    }
 
 
     // Add more files to compose
     public function add($file=false, $location="footer")
     {
         // Ensure we have something to work with
-        if (!empty($file))
-        {
+        if (!empty($file)) {
+
             // Try to init should the construct not have contained an output
             $this->init($file);
             $this->files[$location][] = $file;
@@ -44,13 +50,14 @@ class Compost
         $output = '';
         if (! $this->rendered[$location]) {
 
-            if ($this->debug) var_dump("RENDERING!");
+            if ($this->debug) var_dump("RENDERING START");
 
             $this->heap[$location]     = $this->miniFy($this->heap[$location]);
             $this->hash[$location]     = md5($this->heap[$location]);
             $output                   .= $this->write($location);
             $this->rendered[$location] = true;
 
+            if ($this->debug) var_dump("RENDERING COMPLETE");
         }
         return $output;
     }
@@ -85,8 +92,7 @@ class Compost
                 );
 
                 // Ensure that we were able to write the content to the filesystem
-                if ($writen !== false)
-                {
+                if ($writen !== false) {
                     return $this->paths('uri', $location);
                 }
             }
@@ -111,8 +117,7 @@ class Compost
             $paths[$location]['uri']
         );
 
-        if ($specific !== false)
-        {
+        if ($specific !== false) {
             return $paths[$location][$specific];
         }
         return $paths[$location];
@@ -124,16 +129,14 @@ class Compost
      */
     public function minified($local, $url)
     {
-        if (! empty($this->type))
-        {
+        if (! empty($this->type)) {
             $minified_local = str_replace(
                 "." . $this->type,
                 ".min." . $this->type,
                 $local
             );
 
-            if (file_exists($minified_local))
-            {
+            if (file_exists($minified_local)) {
                 return str_replace(
                     "." . $this->type,
                     ".min." . $this->type,
@@ -165,8 +168,7 @@ class Compost
         $lines      = explode("\n", $content);
         $newContent = array();
 
-        foreach($lines as $lid => $line)
-        {
+        foreach($lines as $lid => $line) {
             $line = trim($line);
 
             // Remove lines with // Comments
@@ -182,8 +184,7 @@ class Compost
             if (stristr($line, '{{IMG}}')) $line = str_replace('{{IMG}}', IMG, $line);
 
             // Ensure that the line still has contents
-            if (!empty($line))
-            {
+            if (!empty($line)) {
                 $newContent[] = $line;
             }
         }
@@ -192,15 +193,15 @@ class Compost
         return $content;
     }
 
+
     public function getDepth()
     {
-        # Otherwise let's get the URI and split it up
+        // Otherwise let's get the URI and split it up
         if (! empty($_SERVER['REQUEST_URI'])) {
             $getCount = substr_count($_SERVER['REQUEST_URI'], '/');
 
-            # Ensure that there was a slash at least
-            if ($getCount > 0)
-            {
+            // Ensure that there was a slash at least
+            if ($getCount > 0) {
                 $test = str_repeat("../", ($getCount - 1));
                 return $test;
             }
@@ -213,18 +214,18 @@ class Compost
     public function init($file)
     {
         // Do we have a type yet?
-        if (empty($this->type) AND pathinfo($file, PATHINFO_EXTENSION) !== false)
-        {
+        if (empty($this->type) AND pathinfo($file, PATHINFO_EXTENSION) !== false) {
+
             // We can only set these once we have a file to work with
-            $this->type         = pathinfo($file, PATHINFO_EXTENSION);
-            $this->inputDir     = PWD . "/assets/" . $this->type;
-            $this->outputDir    = PWD . "/assets/" . $this->type . "/out";
-            $this->uri          = $this->getDepth() . "assets/" . $this->type . "/out";
+            $this->type      = pathinfo($file, PATHINFO_EXTENSION);
+            $this->inputDir  = PWD . "/assets/" . $this->type;
+            $this->outputDir = PWD . "/assets/" . $this->type . "/out";
+            $this->uri       = $this->getDepth() . "assets/" . $this->type . "/out";
         }
     }
 
 
     // Aliases
-    public function addFile($file=false)        { return $this->add($file); }
-    public function uri($location="footer")     { return $this->url($location); }
+    public function addFile($file =false)    { return $this->add($file); }
+    public function uri($location ="footer") { return $this->url($location); }
 }
