@@ -63,6 +63,44 @@ class Compost
     }
 
 
+    public function compile($location="footer"){
+
+        // Render if it's not yet rendered
+        if (! $this->rendered[$location]) {
+            $this->render($location);
+        }
+
+        // Get the paths
+        $normal = $this->paths('uri', $location);
+        $minified = $this->paths('min', $location);
+
+        // Check that the input file exists and that we are dealing with JS
+        if (!file_exists($normal) || !$this->type == "js") {
+            return false;
+        }
+
+        // Minified exists already
+        if (file_exists($minified)) {
+            return "exists";
+        }
+
+        $command = "/usr/bin/java -jar compiler.jar --compilation_level ADVANCED_OPTIMIZATIONS \
+--js {$normal} \
+--js_output_file {$minified} \
+--jscomp_off=internetExplorerChecks \
+--warning_level=QUIET";
+
+        exec($command, $output, $stdOut);
+        if ($stdOut <= 1) {
+            return true;
+        }
+
+        var_dump($output);
+        throw new Exception("Compile failed STDOUT: ".$stdOut, 1);
+        return false;
+    }
+
+
     // Provide the file as is
     public function raw($location="footer")
     {
@@ -108,7 +146,8 @@ class Compost
     {
         $paths[$location] = array(
             "local" => $this->outputDir . "/" . $this->hash[$location] . "." . $this->type,
-            "uri"   => $this->uri . "/" . $this->hash[$location] . "." . $this->type
+            "uri"   => $this->uri . "/" . $this->hash[$location] . "." . $this->type,
+            "min"   => $this->uri . "/" . $this->hash[$location] . ".min." . $this->type
         );
 
         // Over ride with the .min files

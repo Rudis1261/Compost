@@ -45,3 +45,9 @@
     // Just add 'header' or 'footer' as a second parameter for add('file', 'header'), and as a optional parameter for url(header)
     $JS->add("jquery.js", "header");
     echo $JS->url("header") . PHP_EOL;
+
+    // You can even compile JavaScript files using Google's Compile to minify the script.
+    // This does take some processing power. I would not do this for every request for sure.
+    // *REQUIRES JAVA-JRE to be installed
+    $compiled = $JS->compile();
+    var_dump($compiled);

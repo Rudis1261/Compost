@@ -16,6 +16,18 @@ docker run -it --rm --name PHP-Compost \
 php:5.6-cli php index.php
 ```
 
+#### Try optional compiler version *REQUIRES JAVA
+```shell
+# Build the image
+docker build -t drpain/php-cli-java .
+
+# Run the command with the custom image
+docker run -it --rm --name PHP-Compost \
+-v "$PWD":/usr/src/myapp \
+-w /usr/src/myapp \
+drpain/php-cli-java php index.php
+```
+
 Hopefully you have Docker installed already, otherwise this will not work. 
 
 #### Example usage 'index.php'
@@ -67,3 +79,9 @@ echo $CSS->raw() . PHP_EOL;
 // Just add 'header' or 'footer' as a second parameter for add('file', 'header'), and as a optional parameter for url(header)
 $JS->add("jquery.js", "header");
 echo $JS->url("header") . PHP_EOL;
+
+// You can even compile JavaScript files using Google's Compile to minify the script.
+// This does take some processing power. I would not do this for every request for sure.
+// *REQUIRES JAVA-JRE to be installed
+$compiled = $JS->compile();
+var_dump($compiled);
